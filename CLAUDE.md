@@ -9,7 +9,7 @@ Aim to cite sources and attribute credit. If you are unsure of who to credit, st
 SQL-focused portfolio project analyzing Amazon reviews, targeting a data analyst role at Amazon. SQL is the focus (aiming to strengthen window functions and CTEs specifically); Python is for visualizations only. Keep .sql files separate from Python as much as is reasonable.
 
 ## Data
-McAuley Amazon review dataset, Cell Phones & Accessories 5-core subset (reviews_Cell_Phones_and_Accessories_5.json), from a Kaggle re-upload of the Stanford SNAP data. ~194,562 lines. Apache 2.0 license on the Kaggle upload. Required citation (confirmed from the SNAP page): J. McAuley, C. Targett, J. Shi, A. van den Hengel, "Image-based recommendations on styles and substitutes," SIGIR, 2015. Schema is native/unmodified; helpful field is [helpful_votes, total_votes].
+McAuley Amazon review dataset, Cell Phones & Accessories 5-core subset (Cell_Phones_and_Accessories_5.json), from a Kaggle re-upload of the Stanford SNAP data. ~194,562 lines. Apache 2.0 license on the Kaggle upload. Required citation (confirmed from the SNAP page): J. McAuley, C. Targett, J. Shi, A. van den Hengel, "Image-based recommendations on styles and substitutes," SIGIR, 2015. Schema is native/unmodified; helpful field is [helpful_votes, total_votes].
 
 ## Environment
 Fedora laptop + desktop, synced via GitHub over SSH. Python 3.14, SQLite for the database. Using Claude Code with Opus for scaffolding/syntax, writing core analytical queries by hand.

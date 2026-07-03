@@ -194,6 +194,11 @@ cython_debug/
 #   Learn more at https://abstra.io/docs
 .abstra/
 
+# Kate
+#   Kate creates a swap file (.<filename>.kate-swp) alongside any open file
+#   for crash recovery; it's local editor state, not project content.
+*.kate-swp
+
 # Visual Studio Code
 #   Visual Studio Code specific template is maintained in a separate VisualStudioCode.gitignore 
 #   that can be found at https://github.com/github/gitignore/blob/main/Global/VisualStudioCode.gitignore
