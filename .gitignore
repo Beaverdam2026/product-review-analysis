@@ -221,6 +221,7 @@ Thumbs.db
 # Data files
 *.csv
 *.db
+*.json
 *.sqlite
 *.sqlite3
 
