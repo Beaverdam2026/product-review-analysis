@@ -67,14 +67,17 @@ def print_sanity_stats(conn: sqlite3.Connection) -> None:
 
 
 def main():
-    # Idempotent: remove any existing DB so a re-run always builds from scratch.
-    # schema.sql uses bare CREATE TABLE/INDEX, which would otherwise error on a
-    # second run.
-    if DB_PATH.exists():
-        DB_PATH.unlink()
-
     conn = sqlite3.connect(DB_PATH)
+    # Ensure both tables exist (schema.sql uses CREATE ... IF NOT EXISTS, so this
+    # is safe whether or not products has already been loaded), then clear only
+    # this loader's own table. We deliberately do NOT delete the whole DB file:
+    # products lives in the same database and would be wiped along with it.
     conn.executescript(SCHEMA_PATH.read_text())
+    conn.execute("DELETE FROM reviews")
+    # AUTOINCREMENT keeps a counter in sqlite_sequence that DELETE leaves behind;
+    # reset it so review_id restarts at 1, making reloads fully reproducible.
+    conn.execute("DELETE FROM sqlite_sequence WHERE name = 'reviews'")
+    conn.commit()
 
     batch = []
     total_loaded = 0

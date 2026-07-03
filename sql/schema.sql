@@ -1,4 +1,4 @@
-CREATE TABLE reviews (
+CREATE TABLE IF NOT EXISTS reviews (
     review_id        INTEGER PRIMARY KEY AUTOINCREMENT,
     reviewer_id      TEXT NOT NULL,
     asin             TEXT NOT NULL,
@@ -12,6 +12,14 @@ CREATE TABLE reviews (
     review_time      TEXT NOT NULL
 );
 
-CREATE INDEX idx_reviews_asin ON reviews(asin);
-CREATE INDEX idx_reviews_reviewer_id ON reviews(reviewer_id);
-CREATE INDEX idx_reviews_unix_review_time ON reviews(unix_review_time);
+CREATE INDEX IF NOT EXISTS idx_reviews_asin ON reviews(asin);
+CREATE INDEX IF NOT EXISTS idx_reviews_reviewer_id ON reviews(reviewer_id);
+CREATE INDEX IF NOT EXISTS idx_reviews_unix_review_time ON reviews(unix_review_time);
+
+CREATE TABLE IF NOT EXISTS products (
+    asin             TEXT PRIMARY KEY,
+    title            TEXT,
+    price            REAL,
+    brand            TEXT,
+    primary_category TEXT
+);

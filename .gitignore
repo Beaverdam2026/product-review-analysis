@@ -227,6 +227,8 @@ Thumbs.db
 *.csv
 *.db
 *.json
+*.json.gz
+*.gz
 *.sqlite
 *.sqlite3
 
