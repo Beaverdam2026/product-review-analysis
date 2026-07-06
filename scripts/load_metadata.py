@@ -9,6 +9,9 @@ SCHEMA_PATH = Path("sql/schema.sql")
 DATA_PATH = Path("data/meta_Cell_Phones_and_Accessories.json.gz")
 BATCH_SIZE = 5000
 
+# One parsed products row: asin, title, price, brand, primary_category.
+ProductRow = tuple[str, str | None, float | None, str | None, str | None]
+
 INSERT_SQL = """
     INSERT OR REPLACE INTO products (
         asin, title, price, brand, primary_category
@@ -16,7 +19,7 @@ INSERT_SQL = """
 """
 
 
-def clean_text(value):
+def clean_text(value: str | None) -> str | None:
     # Titles/brands carry HTML entities (e.g. "&amp;" -> "&"). Unescape them, and
     # normalise empty strings to NULL so "no brand" is a real absence, not "".
     if not value:
@@ -24,7 +27,7 @@ def clean_text(value):
     return html.unescape(value)
 
 
-def primary_category(categories):
+def primary_category(categories: list[list[str]] | None) -> str | None:
     # categories is a list of category paths, e.g.
     # [['Cell Phones & Accessories', 'Cases', 'Basic Cases']]. The most specific,
     # useful label is the last element of the first path. Guard against missing
@@ -34,7 +37,7 @@ def primary_category(categories):
     return categories[0][-1]
 
 
-def parse_record(line: str) -> tuple:
+def parse_record(line: str) -> ProductRow:
     # These 2014 metadata files are Python dict literals (single-quoted), NOT
     # strict JSON, so ast.literal_eval is required instead of json.loads.
     record = ast.literal_eval(line)

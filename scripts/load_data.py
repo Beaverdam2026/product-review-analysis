@@ -15,7 +15,9 @@ INSERT_SQL = """
 """
 
 
-def parse_record(line: str) -> tuple:
+def parse_record(
+    line: str,
+) -> tuple[str, str, str | None, int, int, str | None, float, str | None, int, str]:
     record = json.loads(line)
     helpful_votes, total_votes = record.get("helpful", [0, 0])
     return (
