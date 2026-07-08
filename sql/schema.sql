@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS products (
 
 -- Analysis done on this view
 -- Removes 2041 reviews from dataset vs original
-CREATE VIEW IF NOT EXISTS reviews_titled AS
+CREATE VIEW IF NOT EXISTS reviews_clean AS
 SELECT r.*
 from reviews r
 JOIN products p ON p.asin = r.asin
