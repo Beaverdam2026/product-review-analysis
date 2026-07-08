@@ -58,6 +58,12 @@ def print_sanity_stats(conn: sqlite3.Connection) -> None:
     distinct_reviewers = cur.execute(
         "SELECT COUNT(DISTINCT reviewer_id) FROM reviews"
     ).fetchone()[0]
+    # reviews_titled (defined in schema.sql) is the analysis view: reviews whose
+    # product carries a title. It JOINs to products, so its count is only
+    # meaningful once metadata has been loaded (load_metadata.py). If products is
+    # empty the join matches nothing, so we report the view only when products is
+    # populated rather than print a misleading 0-row count.
+    products_loaded = cur.execute("SELECT COUNT(*) FROM products").fetchone()[0]
 
     print("\n--- Sanity stats ---")
     print(f"Rows loaded:          {row_count}")
@@ -66,6 +72,17 @@ def print_sanity_stats(conn: sqlite3.Connection) -> None:
     print(f"Rows with votes > 0:  {rated_helpful}")
     print(f"Earliest review: {min_unix_time} (unix) / {min_readable_date}")
     print(f"Latest review:   {max_unix_time} (unix) / {max_readable_date}")
+    if products_loaded:
+        titled = cur.execute("SELECT COUNT(*) FROM reviews_titled").fetchone()[0]
+        print(
+            f"Analysis view (reviews_titled): {titled} rows "
+            f"({row_count - titled} excluded, missing product title)"
+        )
+    else:
+        print(
+            "Analysis view (reviews_titled): skipped "
+            "(products not loaded yet - run load_metadata.py)"
+        )
 
 
 def main():
