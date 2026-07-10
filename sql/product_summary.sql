@@ -1,3 +1,4 @@
+--grain: per product
 SELECT p.title AS product_name,
 COUNT(r.review_id) AS review_count,
 p.brand,

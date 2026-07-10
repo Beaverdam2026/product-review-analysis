@@ -1,3 +1,4 @@
+--grain: per review
 WITH reviewer_avg_stars AS (
     SELECT r.reviewer_id,
         AVG(r.overall) AS reviewer_avg_stars

@@ -1,3 +1,4 @@
+--grain: per review
 WITH ranked AS (
     SELECT r.review_id,
         ROW_NUMBER() OVER (PARTITION BY asin
@@ -19,7 +20,4 @@ JOIN ranked rn ON r.review_id = rn.review_id
 LEFT JOIN products p
 ON r.asin = p.asin
 WHERE rn = 1
-ORDER BY r.helpful_votes DESC
-LIMIT 10;
---ranking done
---TODO: flesh out the other columns selected to fit the use
+ORDER BY r.helpful_votes DESC;
