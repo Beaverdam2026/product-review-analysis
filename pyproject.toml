@@ -3,10 +3,20 @@ name = "product-review-analysis"
 version = "0.1.0"
 description = "SQL-focused analysis of Amazon product reviews."
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "altair>=6.2.2",
+    "matplotlib>=3.11.0",
+    "pandas>=3.0.3",
+]
 
 [tool.uv]
 # Build .venv from a uv-managed CPython, never Fedora's /usr/bin/python3.
 # Keeps the project independent of dnf upgrades, and of stdlib modules
 # (e.g. tkinter) that Fedora splits into separate system packages.
 python-preference = "only-managed"
+
+[dependency-groups]
+dev = [
+    "ipykernel>=7.3.0",
+    "jupyterlab>=4.6.1",
+]
