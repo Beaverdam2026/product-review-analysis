@@ -77,6 +77,10 @@ target/
 
 # Jupyter Notebook
 .ipynb_checkpoints
+#   notebooks/explore.ipynb is committed as a starter, with outputs stripped.
+#   Throwaway notebooks go in notebooks/scratch/ and are never committed, since
+#   .ipynb outputs serialise into the JSON and make diffs unreadable.
+notebooks/scratch/
 
 # IPython
 profile_default/
