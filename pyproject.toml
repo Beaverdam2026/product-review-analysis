@@ -1,0 +1,12 @@
+[project]
+name = "product-review-analysis"
+version = "0.1.0"
+description = "SQL-focused analysis of Amazon product reviews."
+requires-python = ">=3.14"
+dependencies = []
+
+[tool.uv]
+# Build .venv from a uv-managed CPython, never Fedora's /usr/bin/python3.
+# Keeps the project independent of dnf upgrades, and of stdlib modules
+# (e.g. tkinter) that Fedora splits into separate system packages.
+python-preference = "only-managed"
