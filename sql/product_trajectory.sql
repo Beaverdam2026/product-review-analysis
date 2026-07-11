@@ -1,38 +1,45 @@
--- isolate product-day star measure
--- grain: per product per day
-WITH daily AS (
+-- grain: per product per week, of top 30 products
+WITH ranking AS (
     SELECT r.asin,
-        r.unix_review_time AS day,
+    RANK() OVER (ORDER BY COUNT(*) DESC) AS rank_by_reviews
+    FROM reviews_clean r
+    GROUP BY asin
+),
+
+weekly AS (
+    SELECT r.asin,
+        DATE(r.unix_review_time, 'unixepoch', '-6 days', 'weekday 1') AS week,
         COUNT(*) AS n_reviews,
         SUM(r.overall) AS star_sum
     FROM reviews_clean r
-    GROUP BY r.asin, r.unix_review_time
+    WHERE r.asin IN (SELECT asin FROM ranking WHERE rank_by_reviews <= 30)
+    GROUP BY r.asin, week
 ),
 
 trajectory AS (
     SELECT d.asin,
-        d.day,
+        d.week,
         d.n_reviews,
         d.star_sum,
         SUM(star_sum) OVER w / SUM(n_reviews) OVER w AS running_avg
-    FROM daily d
-WINDOW w AS (PARTITION BY d.asin ORDER BY day)
+    FROM weekly d
+WINDOW w AS (PARTITION BY d.asin ORDER BY d.week)
 ),
 
 lagged AS (
     SELECT t.asin,
-        t.day,
+        t.week,
         t.n_reviews,
         t.star_sum,
         t.running_avg,
         lag(running_avg) OVER (PARTITION BY t.asin
-        ORDER BY day) AS prev_running_avg
+        ORDER BY t.week) AS prev_running_avg
     from trajectory t
 )
 
 SELECT p.title,
     l.asin,
-    l.day,
+    l.week,
     l.n_reviews,
     l.star_sum,
     l.running_avg,
@@ -41,5 +48,4 @@ SELECT p.title,
 FROM lagged l
 LEFT JOIN products p
 ON l.asin = p.asin
-ORDER BY l.asin, l.day
-LIMIT 10;
+ORDER BY l.asin, l.week;

@@ -1,14 +1,25 @@
---grain: per product
-SELECT p.title AS product_name,
-COUNT(r.review_id) AS review_count,
-p.brand,
-AVG(r.overall) AS avg_stars,
-AVG(r.helpful_votes) AS avg_upvotes,
-AVG(r.total_votes) AS avg_votes,
-MIN(r.unix_review_time) AS earliest_review,
-MAX(r.unix_review_time) AS latest_review
-FROM reviews_clean r 
-LEFT JOIN products p ON p.asin = r.asin
-GROUP BY r.asin
-ORDER BY review_count DESC
-LIMIT 10;
+--grain: one row per (avg_stars bin x review_count bucket)
+
+WITH product_stats AS (
+    SELECT COUNT(r.review_id) AS review_count,
+        AVG(r.overall) AS avg_stars
+    FROM reviews_clean r
+    GROUP BY r.asin
+)
+
+SELECT ROUND(ps.avg_stars, 1) as stars_bin,
+    COUNT(*) AS product_count,
+    SUM(ps.review_count) AS total_reviews,
+    CASE
+        WHEN ps.review_count < 10  THEN '5-9'
+        WHEN ps.review_count < 30  THEN '10-29'
+        WHEN ps.review_count < 100 THEN '30-99'
+        ELSE '100+'
+    END AS size_bucket,
+    MIN(ps.review_count) AS bucket_order
+
+
+FROM product_stats ps
+GROUP BY ROUND(ps.avg_stars, 1), size_bucket
+ORDER BY MIN(review_count);
+
