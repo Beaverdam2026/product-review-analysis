@@ -5,10 +5,10 @@ WITH ranked AS (
         --ordering by review id to make code deterministic in ~20 cases where
         --there is a match of (helpful_votes, total_votes)
         ORDER BY r.helpful_votes DESC, r.total_votes, r.review_id) as rn
-    FROM reviews_clean r
+    FROM reviews r
 )
 
-SELECT p.title,
+SELECT COALESCE(p.title, r.asin) AS title,
 r.asin,
 r.reviewer_id,
 r.reviewer_name,
@@ -19,7 +19,7 @@ r.total_votes,
 CAST(r.helpful_votes AS REAL) / NULLIF(r.total_votes, 0) AS vote_ratio,
 r.overall,
 r.unix_review_time
-FROM reviews_clean r
+FROM reviews r
 JOIN ranked rn ON r.review_id = rn.review_id
 LEFT JOIN products p
 ON r.asin = p.asin

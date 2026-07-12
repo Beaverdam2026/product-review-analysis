@@ -24,8 +24,9 @@ CREATE TABLE IF NOT EXISTS products (
     primary_category TEXT
 );
 
--- Analysis done on this view
--- Removes 2041 reviews from dataset vs original
+-- Removes 2841 reviews from dataset vs original
+-- unused because of minimal value added and viz issues
+-- resulting from reducing reviewer review count to below 5
 CREATE VIEW IF NOT EXISTS reviews_clean AS
 SELECT r.*
 from reviews r

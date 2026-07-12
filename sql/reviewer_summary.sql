@@ -3,7 +3,7 @@
 WITH reviewers AS (
     SELECT COUNT(r.review_id) AS review_count,
         AVG(r.overall) AS avg_rating
-    FROM reviews_clean r
+    FROM reviews r
     GROUP BY r.reviewer_id
 )
 
