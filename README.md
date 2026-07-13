@@ -7,7 +7,7 @@ each rendered as an interactive chart with commentary.
 **Read the report: <https://beaverdam2026.github.io/product-review-analysis/>**
 
 
-![rating_vs_reviewer_avg](/home/jacke/Projects/product-review-analysis/docs/Assets/rating_vs_reviewer_avg.png)
+![rating_vs_reviewer_avg](docs/Assets/rating_vs_reviewer_avg.png)
 
 ## Questions
 
