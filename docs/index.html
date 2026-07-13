@@ -2264,7 +2264,7 @@ var requirejs,require,define;(function(global,setTimeout){var req,s,head,baseEle
 
 <p>An analysis of 2001-2014 amazon review data. Created for the purpose of practicing writing SQL queries. Primary review dataset used contains 194,439 reviews from 27,879 reviewers. Data is a 5-core subset, meaning every reviewer and every product has at least 5 reviews.</p>
 <p>Data: the Cell Phones &amp; Accessories 5-core subset of the Amazon review dataset (McAuley et al.). Citation: J. McAuley, C. Targett, J. Shi, A. van den Hengel. “Image-based recommendations on styles and substitutes.” SIGIR, 2015.</p>
-<div id="0efaaffa" class="cell" data-execution_count="1">
+<div id="7bf2edbc" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> altair <span class="im">as</span> alt</span>
@@ -2291,7 +2291,7 @@ var requirejs,require,define;(function(global,setTimeout){var req,s,head,baseEle
 <section id="chart-theme" class="level2">
 <h2 class="anchored" data-anchor-id="chart-theme">1. Chart theme</h2>
 <p>Altair theme so charts have consistent appearance. Sequential blue ramp for magnitude, one accent + gray for emphasis, and a red blue diverging set (gray midpoint) for polarity.</p>
-<div id="134522b8" class="cell" data-execution_count="2">
+<div id="fa191054" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Palette (light mode). Sequential = one hue light-&gt;dark; diverging = two hue</span></span>
@@ -2343,7 +2343,7 @@ var requirejs,require,define;(function(global,setTimeout){var req,s,head,baseEle
 <h2 class="anchored" data-anchor-id="rating_vs_reviewer_avg">2. rating_vs_reviewer_avg</h2>
 <p>This query’s grain is (stars given × reviewer’s binned lifetime average), and the scale is magnitude over a grid, so a heatmap with sqrt color scale is used. Counts range 1 to ~18,000. Linear color scale flattens all but the (5, 5.0) cell, while log scale is too dark on midrange cells. Sqrt gives the most instantly understandable visual.</p>
 <p>We can see that the majority of reviews are close to a reviewer’s average here. There are also not many reviewers that consistently give low ratings, but there are many reviewers that consistently give high ratings. 5 star reviews in general are very common. Even reviewers who have an average rating that is well below 5 stars still give 5 star reviews often.</p>
-<div id="d7abc23a" class="cell" data-execution_count="3">
+<div id="49f5077d" class="cell" data-execution_count="3">
 <div class="cell-output cell-output-display cell-output-markdown">
 <div class="callout callout-style-default callout-note callout-titled" title="SQL: sql/rating_vs_reviewer_avg.sql">
 <div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="true" aria-label="Toggle callout">
@@ -2379,7 +2379,7 @@ var requirejs,require,define;(function(global,setTimeout){var req,s,head,baseEle
 </div>
 </div>
 </div>
-<div id="d8db3d75" class="cell" data-execution_count="4">
+<div id="bf42bda7" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>alt.Chart(results[<span class="st">&quot;rating_vs_reviewer_avg&quot;</span>]).mark_rect(</span>
@@ -2420,22 +2420,22 @@ var requirejs,require,define;(function(global,setTimeout){var req,s,head,baseEle
 <div class="cell-output cell-output-display" data-execution_count="4">
 
 <style>
-#altair-viz-4154bd5fd52b465b905a94fd4727ea42.vega-embed {
+#altair-viz-659f1da57ff4462e91a7d49a59ba0ced.vega-embed {
 width: 100%;
 display: flex;
 }
-#altair-viz-4154bd5fd52b465b905a94fd4727ea42.vega-embed details,
-#altair-viz-4154bd5fd52b465b905a94fd4727ea42.vega-embed details summary {
+#altair-viz-659f1da57ff4462e91a7d49a59ba0ced.vega-embed details,
+#altair-viz-659f1da57ff4462e91a7d49a59ba0ced.vega-embed details summary {
 position: relative;
 }
 </style>
-<div id="altair-viz-4154bd5fd52b465b905a94fd4727ea42"></div>
+<div id="altair-viz-659f1da57ff4462e91a7d49a59ba0ced"></div>
 <script type="text/javascript">
   var VEGA_DEBUG = (typeof VEGA_DEBUG == "undefined") ? {} : VEGA_DEBUG;
   (function(spec, embedOpt){
     let outputDiv = document.currentScript.previousElementSibling;
-    if (outputDiv.id !== "altair-viz-4154bd5fd52b465b905a94fd4727ea42") {
-      outputDiv = document.getElementById("altair-viz-4154bd5fd52b465b905a94fd4727ea42");
+    if (outputDiv.id !== "altair-viz-659f1da57ff4462e91a7d49a59ba0ced") {
+      outputDiv = document.getElementById("altair-viz-659f1da57ff4462e91a7d49a59ba0ced");
     }
 
     const paths = {
@@ -2492,7 +2492,7 @@ position: relative;
 <h2 class="anchored" data-anchor-id="product_trajectory">3. product_trajectory</h2>
 <p>Average rating for the top 30 most reviewed products over time. Mouse over a line for information on it. The query hides each product’s weeks before its 10th review. This kind of visualization allows for many values to be put on one chart without information loss (with interaction), but loses the instant readability you would often prefer from a visualization. I also opted to start the x axis at 2012. The data is still present in the query and underlying data found in the mouse hover, but it’s not visually seen. The data from before 2012 was pretty sparse, and hindered the reading of the more recent data.</p>
 <p>Mousing over each of the lines in the graph, it can be observed that highly reviewed products tend to keep relatively stable average review scores. Once a product is established, there is not likely to be significant movement in the average rating. Each of the most reviewed products also has reviews dating at least 1 year back. There are no notable recent additions in this query’s results.</p>
-<div id="7a6c97b9" class="cell" data-execution_count="5">
+<div id="2965b7b4" class="cell" data-execution_count="5">
 <div class="cell-output cell-output-display cell-output-markdown">
 <div class="callout callout-style-default callout-note callout-titled" title="SQL: sql/product_trajectory.sql">
 <div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="true" aria-label="Toggle callout">
@@ -2567,7 +2567,7 @@ position: relative;
 </div>
 </div>
 </div>
-<div id="74ef0fe3" class="cell" data-execution_count="6">
+<div id="4f781ecf" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>hover <span class="op">=</span> alt.selection_point(</span>
@@ -2625,22 +2625,22 @@ position: relative;
 <div class="cell-output cell-output-display" data-execution_count="6">
 
 <style>
-#altair-viz-b3140dba700647119124da33040e6075.vega-embed {
+#altair-viz-5e0f8966d3df4916b2d237970e302e56.vega-embed {
 width: 100%;
 display: flex;
 }
-#altair-viz-b3140dba700647119124da33040e6075.vega-embed details,
-#altair-viz-b3140dba700647119124da33040e6075.vega-embed details summary {
+#altair-viz-5e0f8966d3df4916b2d237970e302e56.vega-embed details,
+#altair-viz-5e0f8966d3df4916b2d237970e302e56.vega-embed details summary {
 position: relative;
 }
 </style>
-<div id="altair-viz-b3140dba700647119124da33040e6075"></div>
+<div id="altair-viz-5e0f8966d3df4916b2d237970e302e56"></div>
 <script type="text/javascript">
   var VEGA_DEBUG = (typeof VEGA_DEBUG == "undefined") ? {} : VEGA_DEBUG;
   (function(spec, embedOpt){
     let outputDiv = document.currentScript.previousElementSibling;
-    if (outputDiv.id !== "altair-viz-b3140dba700647119124da33040e6075") {
-      outputDiv = document.getElementById("altair-viz-b3140dba700647119124da33040e6075");
+    if (outputDiv.id !== "altair-viz-5e0f8966d3df4916b2d237970e302e56") {
+      outputDiv = document.getElementById("altair-viz-5e0f8966d3df4916b2d237970e302e56");
     }
 
     const paths = {
@@ -2697,7 +2697,7 @@ position: relative;
 <h2 class="anchored" data-anchor-id="reviewer_summary">4. reviewer_summary</h2>
 <p>Reviews written (log) vs # of reviewers. The primary takeaway here is that the majority of reviewers do not write &gt;10 reviews. Over 90% of the reviewers in the entire dataset wrote 10 or fewer reviews. This could suggest that the average reviewer is a real end user, since someone paid to write reviews would presumably write many. I would be curious to see how this has changed today, are a greater proportion of Amazon reviewers prolific now?</p>
 <p>Reviews written (log) vs avg rating given. The right side of this chart is clearly lacking in data pretty significantly, which tracks with what we see in the first chart. What we can say is that on average, reviewers tend to average about a 4 star rating in this dataset. This would indicate that the average product that someone reviews is satisfactory to them. This tracks with real world expectations. The points to the right of ~20 reviews are mostly noise, but prolific reviewers (20+ reviews) do rate slightly higher on average.</p>
-<div id="367d1c00" class="cell" data-execution_count="7">
+<div id="6f3c434a" class="cell" data-execution_count="7">
 <div class="cell-output cell-output-display cell-output-markdown">
 <div class="callout callout-style-default callout-note callout-titled" title="SQL: sql/reviewer_summary.sql">
 <div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="true" aria-label="Toggle callout">
@@ -2731,7 +2731,7 @@ position: relative;
 </div>
 </div>
 </div>
-<div id="5bfd7b10" class="cell" data-execution_count="8">
+<div id="7acc754e" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>x_reviews <span class="op">=</span> alt.X(</span>
@@ -2861,22 +2861,22 @@ position: relative;
 <div class="cell-output cell-output-display" data-execution_count="8">
 
 <style>
-#altair-viz-8512e116c9e84ceebcc598f7704af3ed.vega-embed {
+#altair-viz-4fbc7a204a074646850e1c34ec387c72.vega-embed {
 width: 100%;
 display: flex;
 }
-#altair-viz-8512e116c9e84ceebcc598f7704af3ed.vega-embed details,
-#altair-viz-8512e116c9e84ceebcc598f7704af3ed.vega-embed details summary {
+#altair-viz-4fbc7a204a074646850e1c34ec387c72.vega-embed details,
+#altair-viz-4fbc7a204a074646850e1c34ec387c72.vega-embed details summary {
 position: relative;
 }
 </style>
-<div id="altair-viz-8512e116c9e84ceebcc598f7704af3ed"></div>
+<div id="altair-viz-4fbc7a204a074646850e1c34ec387c72"></div>
 <script type="text/javascript">
   var VEGA_DEBUG = (typeof VEGA_DEBUG == "undefined") ? {} : VEGA_DEBUG;
   (function(spec, embedOpt){
     let outputDiv = document.currentScript.previousElementSibling;
-    if (outputDiv.id !== "altair-viz-8512e116c9e84ceebcc598f7704af3ed") {
-      outputDiv = document.getElementById("altair-viz-8512e116c9e84ceebcc598f7704af3ed");
+    if (outputDiv.id !== "altair-viz-4fbc7a204a074646850e1c34ec387c72") {
+      outputDiv = document.getElementById("altair-viz-4fbc7a204a074646850e1c34ec387c72");
     }
 
     const paths = {
@@ -2932,7 +2932,7 @@ position: relative;
 <section id="product_summary" class="level2">
 <h2 class="anchored" data-anchor-id="product_summary">5. product_summary</h2>
 <p>The grain is a grid (avg-stars bin × review-volume bucket). Note the log color scale. Looking at the visualization, products with many reviews tend to have around a 4 star average review. This is very similar to what we saw in the previous question, but from a different angle. The most interesting takeaway here is that products with a lower average score tend to have fewer reviews. There’s not even one product with 30+ reviews that has an average score of 2 stars or less. This means that if a product gets a large amount of reviews, it’s likely a product that most reviewers will rate highly.</p>
-<div id="90332bde" class="cell" data-execution_count="9">
+<div id="5cf30aa5" class="cell" data-execution_count="9">
 <div class="cell-output cell-output-display cell-output-markdown">
 <div class="callout callout-style-default callout-note callout-titled" title="SQL: sql/product_summary.sql">
 <div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="true" aria-label="Toggle callout">
@@ -2976,7 +2976,7 @@ position: relative;
 </div>
 </div>
 </div>
-<div id="b2d9e1d0" class="cell" data-execution_count="10">
+<div id="c833f62d" class="cell" data-execution_count="10">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>SIZE_BUCKETS <span class="op">=</span> [<span class="st">&quot;5-9&quot;</span>, <span class="st">&quot;10-29&quot;</span>, <span class="st">&quot;30-99&quot;</span>, <span class="st">&quot;100+&quot;</span>]</span>
@@ -3015,22 +3015,22 @@ position: relative;
 <div class="cell-output cell-output-display" data-execution_count="10">
 
 <style>
-#altair-viz-6d6cc6ff840b4d5bb963d762317433dc.vega-embed {
+#altair-viz-15b18eb6135d496ea278616cadbc26ec.vega-embed {
 width: 100%;
 display: flex;
 }
-#altair-viz-6d6cc6ff840b4d5bb963d762317433dc.vega-embed details,
-#altair-viz-6d6cc6ff840b4d5bb963d762317433dc.vega-embed details summary {
+#altair-viz-15b18eb6135d496ea278616cadbc26ec.vega-embed details,
+#altair-viz-15b18eb6135d496ea278616cadbc26ec.vega-embed details summary {
 position: relative;
 }
 </style>
-<div id="altair-viz-6d6cc6ff840b4d5bb963d762317433dc"></div>
+<div id="altair-viz-15b18eb6135d496ea278616cadbc26ec"></div>
 <script type="text/javascript">
   var VEGA_DEBUG = (typeof VEGA_DEBUG == "undefined") ? {} : VEGA_DEBUG;
   (function(spec, embedOpt){
     let outputDiv = document.currentScript.previousElementSibling;
-    if (outputDiv.id !== "altair-viz-6d6cc6ff840b4d5bb963d762317433dc") {
-      outputDiv = document.getElementById("altair-viz-6d6cc6ff840b4d5bb963d762317433dc");
+    if (outputDiv.id !== "altair-viz-15b18eb6135d496ea278616cadbc26ec") {
+      outputDiv = document.getElementById("altair-viz-15b18eb6135d496ea278616cadbc26ec");
     }
 
     const paths = {
@@ -3087,7 +3087,7 @@ position: relative;
 <h2 class="anchored" data-anchor-id="most_helpful_reviews">6. most_helpful_reviews</h2>
 <p>The critical reviews are highlighted here, because I think that’s where the most interesting parts of this query are. What is worth noting that you can’t see in this visualization is that many products aren’t represented here. Only ~40% of products have a top review with &gt;=5 helpful votes.</p>
 <p>The primary takeaway here at first glance is that as helpful_votes rise, the share of critical reviews goes down. On the right side of the graph, we can see how sparse the share of critical (red) reviews becomes. Another notable aspect is that reviews with many helpful votes tend to have a high ratio. There are not many divisive reviews in the sample group. A naive interpretation may be that people are more swayed by positive suggestions, rather than negative ones. However, it is worth remembering that reviews with many votes are most commonly found on products with many reviews, which tend to skew positive in their ratings anyways.</p>
-<div id="d64c2054" class="cell" data-execution_count="11">
+<div id="f9c9b414" class="cell" data-execution_count="11">
 <div class="cell-output cell-output-display cell-output-markdown">
 <div class="callout callout-style-default callout-note callout-titled" title="SQL: sql/most_helpful_reviews.sql">
 <div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="true" aria-label="Toggle callout">
@@ -3133,7 +3133,7 @@ position: relative;
 </div>
 </div>
 </div>
-<div id="9beda375" class="cell" data-execution_count="12">
+<div id="fefd01d6" class="cell" data-execution_count="12">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>CRITICAL <span class="op">=</span> <span class="st">&quot;1-2★ (critical)&quot;</span></span>
@@ -3185,22 +3185,22 @@ position: relative;
 <div class="cell-output cell-output-display" data-execution_count="12">
 
 <style>
-#altair-viz-0f371e4b291e4d7493680ccc3d910395.vega-embed {
+#altair-viz-af1658eb805f48feafd97cc4179b98de.vega-embed {
 width: 100%;
 display: flex;
 }
-#altair-viz-0f371e4b291e4d7493680ccc3d910395.vega-embed details,
-#altair-viz-0f371e4b291e4d7493680ccc3d910395.vega-embed details summary {
+#altair-viz-af1658eb805f48feafd97cc4179b98de.vega-embed details,
+#altair-viz-af1658eb805f48feafd97cc4179b98de.vega-embed details summary {
 position: relative;
 }
 </style>
-<div id="altair-viz-0f371e4b291e4d7493680ccc3d910395"></div>
+<div id="altair-viz-af1658eb805f48feafd97cc4179b98de"></div>
 <script type="text/javascript">
   var VEGA_DEBUG = (typeof VEGA_DEBUG == "undefined") ? {} : VEGA_DEBUG;
   (function(spec, embedOpt){
     let outputDiv = document.currentScript.previousElementSibling;
-    if (outputDiv.id !== "altair-viz-0f371e4b291e4d7493680ccc3d910395") {
-      outputDiv = document.getElementById("altair-viz-0f371e4b291e4d7493680ccc3d910395");
+    if (outputDiv.id !== "altair-viz-af1658eb805f48feafd97cc4179b98de") {
+      outputDiv = document.getElementById("altair-viz-af1658eb805f48feafd97cc4179b98de");
     }
 
     const paths = {
