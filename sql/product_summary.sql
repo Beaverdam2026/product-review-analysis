@@ -7,7 +7,7 @@ WITH product_stats AS (
     GROUP BY r.asin
 )
 
-SELECT ROUND(ps.avg_stars, 1) as stars_bin,
+SELECT FLOOR(ps.avg_stars * 5) / 5.0 as stars_bin,
     COUNT(*) AS product_count,
     SUM(ps.review_count) AS total_reviews,
     CASE
@@ -20,6 +20,6 @@ SELECT ROUND(ps.avg_stars, 1) as stars_bin,
 
 
 FROM product_stats ps
-GROUP BY ROUND(ps.avg_stars, 1), size_bucket
+GROUP BY FLOOR(ps.avg_stars * 5) / 5.0, size_bucket
 ORDER BY MIN(review_count);
 

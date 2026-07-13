@@ -9,8 +9,8 @@ WITH reviewer_avg_stars AS (
 SELECT 
     r.overall AS stars,
     COUNT(*) AS review_count,
-    FLOOR(ra.reviewer_avg_stars * 10) / 10.0 AS reviewer_avg_bin,
-    r.overall - FLOOR(ra.reviewer_avg_stars * 10) / 10.0 AS above_reviewer_avg
+    FLOOR(ra.reviewer_avg_stars * 5) / 5.0 AS reviewer_avg_bin,
+    r.overall - FLOOR(ra.reviewer_avg_stars * 5) / 5.0 AS above_reviewer_avg
 FROM reviews r
 JOIN reviewer_avg_stars ra 
     ON ra.reviewer_id = r.reviewer_id

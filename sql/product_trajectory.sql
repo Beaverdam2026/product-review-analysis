@@ -33,6 +33,7 @@ lagged AS (
         t.n_reviews,
         t.star_sum,
         t.running_avg,
+        t.review_count,
         lag(running_avg) OVER (PARTITION BY t.asin
         ORDER BY t.week) AS prev_running_avg
     from trajectory t
@@ -46,6 +47,7 @@ SELECT COALESCE(p.title, l.asin) AS title,
     l.n_reviews,
     l.star_sum,
     l.running_avg,
+    l.review_count,
     l.prev_running_avg,
     l.running_avg - l.prev_running_avg AS delta
 FROM lagged l
