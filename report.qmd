@@ -1,0 +1,465 @@
+---
+title: Amazon Product Review Analysis
+author: Jack Evans
+format:
+  html:
+    embed-resources: true
+    code-fold: true
+    toc: true
+jupyter: python3
+---
+
+An analysis of 2001-2014 amazon review data. Created for the purpose of practicing writing SQL queries. Primary review dataset used contains 194,439 reviews from 27,879 reviewers. Data is a 5-core subset, meaning every reviewer and every product has at least 5 reviews.
+
+Data: the Cell Phones & Accessories 5-core subset of the Amazon review dataset
+(McAuley et al.). Citation: J. McAuley, C. Targett, J. Shi, A. van den Hengel.
+"Image-based recommendations on styles and substitutes." SIGIR, 2015.
+
+
+```{python}
+import altair as alt
+from IPython.display import Markdown, display
+
+from scripts.queries import ANALYSIS_QUERIES, read_sql, run_query
+
+results = {name: run_query(name) for name in ANALYSIS_QUERIES}
+
+
+def show_sql(name: str) -> None:
+    """Render sql/<name>.sql as a collapsible, syntax-highlighted block.
+
+    The fence is built with string math because a literal triple-backtick
+    inside this cell would terminate the cell's own fence in the .qmd source.
+    """
+    fence = "`" * 3
+    display(Markdown(
+        f'::: {{.callout-note collapse="false" title="SQL: sql/{name}.sql"}}\n'
+        f"{fence}sql\n{read_sql(name)}\n{fence}\n:::"
+    ))
+```
+
+## 1. Chart theme
+
+Altair theme so charts have consistent appearance.
+Sequential blue ramp for magnitude, one accent + gray for emphasis, and a
+red blue diverging set (gray midpoint) for polarity.
+
+```{python}
+# Palette (light mode). Sequential = one hue light->dark; diverging = two hue
+# poles around a neutral gray midpoint; emphasis = one accent hue + gray.
+ACCENT = "#2a78d6"       # blue accent
+DEEMPHASIS = "#c3c2b7"   # gray for context lines in emphasis charts
+SEQ_RAMP = [             # sequential blue ramp, light -> dark
+    "#cde2fb", "#9ec5f4", "#6da7ec", "#3987e5", "#256abf", "#184f95", "#0d366b",
+]
+DIVERGING_5 = [          # stars 1..5: red pole, neutral gray, blue pole
+    "#c73433", "#e88a89", "#a7a69f", "#86b6ef", "#1c5cab",
+]
+SURFACE = "#fcfcfb"
+MUTED = "#898781"    # gray for secondary data marks (matches axis-label ink)
+
+
+# alt.theme.register installs this as the default config for every chart in
+# the session (enable=True activates it immediately).
+@alt.theme.register("review_theme", enable=True)
+def review_theme() -> alt.theme.ThemeConfig:
+    return {
+        "config": {
+            "background": SURFACE,
+            "font": 'system-ui, -apple-system, "Segoe UI", sans-serif',
+            "view": {"stroke": None},
+            "axis": {
+                "labelColor": "#898781",
+                "titleColor": "#52514e",
+                "gridColor": "#e1e0d9",
+                "domainColor": "#c3c2b7",
+                "tickColor": "#c3c2b7",
+                "titleFontWeight": "normal",
+            },
+            "legend": {"labelColor": "#52514e", "titleColor": "#52514e"},
+            "title": {
+                "color": "#0b0b0b",
+                "fontSize": 14,
+                "fontWeight": "bold",
+                "anchor": "start",
+                "subtitleColor": "#52514e",
+                "subtitleFontSize": 12,
+            },
+        }
+    }
+```
+
+## 2. rating_vs_reviewer_avg
+
+This query's grain is (stars given × reviewer's binned lifetime average), and the scale is magnitude over a grid, so a heatmap with sqrt color scale is used. Counts range 1 to ~18,000. Linear color scale flattens all but the (5, 5.0) cell, while log scale is too dark on midrange cells. Sqrt gives the most instantly understandable visual.
+
+We can see that the majority of reviews are close to a reviewer's average here. There are also not many reviewers that consistently give low ratings, but there are many reviewers that consistently give high ratings. 5 star reviews in general are very common. Even reviewers who have an average rating that is well below 5 stars still give 5 star reviews often.
+
+```{python}
+#| echo: false
+show_sql("rating_vs_reviewer_avg")
+```
+
+```{python}
+alt.Chart(results["rating_vs_reviewer_avg"]).mark_rect(
+    # a hairline gap between cells, in the surface color, so fills never touch
+    stroke=SURFACE,
+    strokeWidth=2,
+).encode(
+    x=alt.X(
+        "reviewer_avg_bin:O",
+        title="Reviewer's lifetime average (binned to 0.2)",
+        # 21 bins fit full labels; no sparse-label expression needed here
+        axis=alt.Axis(labelAngle=0),
+    ),
+    y=alt.Y("stars:O", sort="descending", title="Stars given"),
+    color=alt.Color(
+        "review_count:Q",
+        # sqrt, not log: counts span 1 to ~18k and log spent the dark end of
+        # the ramp on everything above a few hundred; sqrt reserves darkness
+        # for the thousands, so only the (4-5 stars, 4.0-5.0 avg) hotspot pops
+        scale=alt.Scale(type="sqrt", range=SEQ_RAMP),
+        title="Reviews (sqrt scale)",
+    ),
+    tooltip=[
+        alt.Tooltip("stars:O", title="Stars given"),
+        alt.Tooltip("reviewer_avg_bin:O", title="Reviewer avg"),
+        alt.Tooltip("review_count:Q", title="Reviews", format=","),
+        alt.Tooltip("above_reviewer_avg:Q", title="Above own avg", format="+.1f"),
+    ],
+).properties(
+    width=620,
+    height=180,
+    title=alt.Title(
+        "Ratings vs. the reviewer's own average",
+        subtitle="Each cell counts reviews; the diagonal is people rating at their usual level.",
+    ),
+)
+```
+
+## 3. product_trajectory
+
+Average rating for the top 30 most reviewed products over time. Mouse over a line for information on it. The query hides each product's weeks before its 10th review. This kind of visualization allows for many values to be put on one chart without information loss (with interaction), but loses the instant readability you would often prefer from a visualization. I also opted to start the x axis at 2012. The data is still present in the query and underlying data found in the mouse hover, but it's not visually seen. The data from before 2012 was pretty sparse, and hindered the reading of the more recent data.
+
+Mousing over each of the lines in the graph, it can be observed that highly reviewed products tend to keep relatively stable average review scores. Once a product is established, there is not likely to be significant movement in the average rating. Each of the most reviewed products also has reviews dating at least 1 year back. There are no notable recent additions in this query's results.
+
+```{python}
+#| echo: false
+show_sql("product_trajectory")
+```
+
+```{python}
+hover = alt.selection_point(
+    fields=["asin"], on="pointerover", clear="pointerout", empty=False
+)
+
+trajectory_base = alt.Chart(results["product_trajectory"]).encode(
+    x=alt.X(
+        "week:T",
+        title=None,
+        axis=alt.Axis(format="%Y", tickCount="year"),
+        # start at 2012: only 4% of rows (8 of 30 products) are earlier, and
+        # those sparse early segments squeezed the span where the action is.
+        # domainMin clamps the window; clip=True on the line marks (below)
+        # cuts the pre-2012 segments at the axis instead of drawing past it.
+        scale=alt.Scale(domainMin=alt.DateTime(year=2012)),
+    ),
+    y=alt.Y("running_avg:Q", scale=alt.Scale(zero=False), title="Running average stars"),
+    # detail splits the data into one line per product without assigning colors
+    detail="asin:N",
+)
+
+trajectory_lines = trajectory_base.mark_line(clip=True).encode(
+    color=alt.condition(hover, alt.value(ACCENT), alt.value(DEEMPHASIS)),
+    strokeWidth=alt.condition(hover, alt.value(2.5), alt.value(1.2)),
+    opacity=alt.condition(hover, alt.value(1.0), alt.value(0.75)),
+)
+
+trajectory_hit = trajectory_base.mark_line(clip=True, strokeWidth=10, opacity=0.001).encode(
+    tooltip=[
+        alt.Tooltip("title:N", title="Product"),
+        alt.Tooltip("week:T", title="Week of"),
+        alt.Tooltip("running_avg:Q", title="Running avg", format=".2f"),
+        alt.Tooltip("n_reviews:Q", title="Reviews that week"),
+        alt.Tooltip("review_count:Q", title="Total reviews so far", format=","),
+        alt.Tooltip("delta:Q", title="Change vs prev week", format="+.3f"),
+    ]
+).add_params(hover)
+
+(trajectory_lines + trajectory_hit).properties(
+    width=620,
+    height=300,
+    title=alt.Title(
+        "Rating trajectories of the 30 most-reviewed products",
+        subtitle="Hover a line to identify the product. Weekly running average, shown from each product's 10th review onward (window starts 2012).",
+    ),
+    # the whole point of the hover is seeing which line lit up, and the default
+    # tooltip position (10px from the cursor) sits right on top of it. These
+    # are vega-tooltip offsets, passed as embed options: vega-embed reads
+    # usermeta.embedOptions from the spec itself, so the shift applies to this
+    # chart only (and survives Quarto, which renders through vega-embed too).
+    usermeta={"embedOptions": {"tooltip": {"offsetX": 20, "offsetY": 40}}},
+)
+```
+
+## 4. reviewer_summary
+
+Reviews written (log) vs # of reviewers. The primary takeaway here is that the majority of reviewers do not write >10 reviews. Over 90% of the reviewers in the entire dataset wrote 10 or fewer reviews. This could suggest that the average reviewer is a real end user, since someone paid to write reviews would presumably write many. I would be curious to see how this has changed today, are a greater proportion of Amazon reviewers prolific now?
+
+Reviews written (log) vs avg rating given. The right side of this chart is clearly lacking in data pretty significantly, which tracks with what we see in the first chart. What we can say is that on average, reviewers tend to average about a 4 star rating in this dataset. This would indicate that the average product that someone reviews is satisfactory to them. This tracks with real world expectations. The points to the right of ~20 reviews are mostly noise, but prolific reviewers (20+ reviews) do rate slightly higher on average.
+
+```{python}
+#| echo: false
+show_sql("reviewer_summary")
+```
+
+```{python}
+x_reviews = alt.X(
+    "review_count:Q",
+    # nice=False stops the log scale rounding its floor down to 1;
+    # the data starts at the 5-core minimum of 5
+    scale=alt.Scale(type="log", nice=False),
+    title="Reviews written (log)",
+    axis=alt.Axis(values=[5, 10, 20, 50, 100, 150]),
+)
+
+activity = alt.Chart(results["reviewer_summary"]).mark_circle(
+    size=45, color=ACCENT, opacity=0.85
+).encode(
+    x=x_reviews,
+    y=alt.Y(
+        "reviewer_count:Q",
+        scale=alt.Scale(type="log"),
+        title="Reviewers (log)",
+        # a log axis grids every minor tick by default (ruled-paper effect);
+        # tickCount thins it, "~s" abbreviates 10000 -> 10k
+        axis=alt.Axis(tickCount=4, format="~s"),
+    ),
+    tooltip=[
+        alt.Tooltip("review_count:Q", title="Reviews written"),
+        alt.Tooltip("reviewer_count:Q", title="Reviewers", format=","),
+    ],
+).properties(
+    width=620,
+    height=180,
+    title=alt.Title(
+        "How active are reviewers?",
+        subtitle="Every reviewer has at least 5 reviews — the 5-core guarantee. Gray line: running total of reviewers counted (hover for the share).",
+    ),
+)
+
+# cumulative count of reviewers covered up to each activity level, on the
+# same log y-axis (same units as the dots, so the scale is shared honestly).
+# Computed chart-side: transform_window running-sums reviewer_count in
+# review_count order; step-after because the total only jumps at levels that
+# exist. Built as a base so the visible line, its fat invisible hover target
+# (a 2px stroke is unhoverable on its own), and the milestone label all share
+# the transforms.
+cumulative_base = alt.Chart(results["reviewer_summary"]).transform_window(
+    cum_reviewers="sum(reviewer_count)",
+    sort=[alt.SortField("review_count", order="ascending")],
+).transform_joinaggregate(
+    total_reviewers="sum(reviewer_count)",
+).transform_calculate(
+    share="datum.cum_reviewers / datum.total_reviewers",
+).encode(x=x_reviews, y=alt.Y("cum_reviewers:Q", title=None))
+
+cumulative_tooltip = [
+    alt.Tooltip("review_count:Q", title="Reviews written"),
+    alt.Tooltip("cum_reviewers:Q", title="Reviewers so far", format=","),
+    alt.Tooltip("share:Q", title="Share of all reviewers", format=".1%"),
+]
+
+cumulative_hit = cumulative_base.mark_line(
+    interpolate="step-after", strokeWidth=14, opacity=0.001
+).encode(tooltip=cumulative_tooltip)
+
+cumulative_line = cumulative_base.mark_line(
+    interpolate="step-after", color=MUTED, opacity=0.6, strokeWidth=2
+).encode(tooltip=cumulative_tooltip)
+
+# one direct label so the line's headline is readable without hovering
+cumulative_label = cumulative_base.transform_filter(
+    "datum.review_count == 10"
+).transform_calculate(
+    label="format(datum.share, '.0%') + ' of reviewers by ≤10 reviews'"
+).mark_text(align="left", dx=8, dy=14, color=MUTED, fontSize=11).encode(
+    text="label:N"
+)
+
+# layer order: hit target at the bottom so the dots keep their own hover
+activity_panel = cumulative_hit + cumulative_line + cumulative_label + activity
+
+leniency = alt.Chart(results["reviewer_summary"]).mark_circle(
+    color=ACCENT, opacity=0.85
+).encode(
+    x=x_reviews,
+    y=alt.Y(
+        "avg_reviewer_rating:Q",
+        scale=alt.Scale(zero=False),
+        title="Avg rating given",
+    ),
+    # size shows how many reviewers each point summarizes, so the eye can
+    # discount the noisy singleton points on the right. Legend sits at the
+    # bottom of the stack: its default top-right spot parks it beside the
+    # activity panel, whose dots are constant-size — a misreading trap.
+    size=alt.Size(
+        "reviewer_count:Q",
+        scale=alt.Scale(type="log", range=[20, 300]),
+        title="Reviewers at this level",
+        legend=alt.Legend(orient="bottom", direction="horizontal"),
+    ),
+    tooltip=[
+        alt.Tooltip("review_count:Q", title="Reviews written"),
+        alt.Tooltip("avg_reviewer_rating:Q", title="Avg rating", format=".2f"),
+        alt.Tooltip("reviewer_count:Q", title="Reviewers", format=","),
+    ],
+).properties(
+    width=620,
+    height=180,
+    title=alt.Title(
+        "Do prolific reviewers rate differently?",
+        subtitle="Point size = how many reviewers sit at that activity level (log). Dashed line: average over all reviewers.",
+    ),
+)
+
+# reviewer-weighted overall average as a dashed reference rule, so "rate
+# differently" has a visible baseline to differ from
+baseline = alt.Chart(results["reviewer_summary"]).transform_calculate(
+    weighted="datum.reviewer_count * datum.avg_reviewer_rating"
+).transform_aggregate(
+    total_weighted="sum(weighted)", total_reviewers="sum(reviewer_count)"
+).transform_calculate(
+    mean="datum.total_weighted / datum.total_reviewers"
+).mark_rule(color=MUTED, opacity=0.6, strokeDash=[4, 3]).encode(
+    y=alt.Y("mean:Q"),
+    tooltip=[alt.Tooltip("mean:Q", title="Average over all reviewers", format=".2f")],
+)
+
+alt.vconcat(activity_panel, leniency + baseline).resolve_scale(x="shared")
+```
+
+## 5. product_summary
+
+The grain is a grid (avg-stars bin × review-volume bucket). Note the log color scale. Looking at the visualization, products with many reviews tend to have around a 4 star average review. This is very similar to what we saw in the previous question, but from a different angle. The most interesting takeaway here is that products with a lower average score tend to have fewer reviews. There's not even one product with 30+ reviews that has an average score of 2 stars or less. This means that if a product gets a large amount of reviews, it's likely a product that most reviewers will rate highly.
+
+```{python}
+#| echo: false
+show_sql("product_summary")
+```
+
+```{python}
+SIZE_BUCKETS = ["5-9", "10-29", "30-99", "100+"]
+
+alt.Chart(results["product_summary"]).mark_rect(
+    stroke=SURFACE, strokeWidth=2
+).encode(
+    x=alt.X(
+        "stars_bin:O",
+        title="Average stars (binned to 0.2)",
+        # 21 bins fit full labels; no sparse-label expression needed here
+        axis=alt.Axis(labelAngle=0),
+    ),
+    # reversed so the biggest products sit on top
+    y=alt.Y("size_bucket:O", sort=SIZE_BUCKETS[::-1], title="Reviews per product"),
+    color=alt.Color(
+        "product_count:Q",
+        scale=alt.Scale(type="log", range=SEQ_RAMP),
+        title="Products (log)",
+    ),
+    tooltip=[
+        alt.Tooltip("size_bucket:O", title="Reviews per product"),
+        alt.Tooltip("stars_bin:O", title="Avg stars bin"),
+        alt.Tooltip("product_count:Q", title="Products", format=","),
+        alt.Tooltip("total_reviews:Q", title="Total reviews", format=","),
+    ],
+).properties(
+    width=620,
+    height=160,
+    title=alt.Title(
+        "The product landscape: rating vs. popularity",
+        subtitle="Each cell counts products at that (avg stars, review volume) combination.",
+    ),
+)
+```
+
+## 6. most_helpful_reviews
+
+The critical reviews are highlighted here, because I think that's where the most interesting parts of this query are. What is worth noting that you can't see in this visualization is that many products aren't represented here. Only ~40% of products have a top review with >=5 helpful votes.
+
+The primary takeaway here at first glance is that as helpful_votes rise, the share of critical reviews goes down. On the right side of the graph, we can see how sparse the share of critical (red) reviews becomes. Another notable aspect is that reviews with many helpful votes tend to have a high ratio. There are not many divisive reviews in the sample group. A naive interpretation may be that people are more swayed by positive suggestions, rather than negative ones. However, it is worth remembering that reviews with many votes are most commonly found on products with many reviews, which tend to skew positive in their ratings anyways.
+
+```{python}
+#| echo: false
+show_sql("most_helpful_reviews")
+```
+
+```{python}
+CRITICAL = "1-2★ (critical)"
+CONTEXT = "3-5★"
+
+alt.Chart(results["most_helpful_reviews"]).transform_calculate(
+    kind=f"datum.overall <= 2 ? '{CRITICAL}' : '{CONTEXT}'"
+).mark_circle().encode(
+    x=alt.X(
+        "helpful_votes:Q",
+        # nice=False keeps the domain at the data extent (5 to ~2,000) instead
+        # of rounding out to full powers of ten
+        scale=alt.Scale(type="log", nice=False),
+        title="Helpful votes (log)",
+        axis=alt.Axis(values=[5, 10, 20, 50, 100, 200, 500, 1000, 2000], format="~s"),
+    ),
+    y=alt.Y(
+        "vote_ratio:Q",
+        scale=alt.Scale(domain=[0, 1]),
+        title="Helpful / total votes",
+        axis=alt.Axis(format="%"),
+    ),
+    color=alt.Color(
+        "kind:N",
+        scale=alt.Scale(domain=[CRITICAL, CONTEXT], range=["#c73433", DEEMPHASIS]),
+        title=None,
+    ),
+    size=alt.condition(f"datum.kind === '{CRITICAL}'", alt.value(34), alt.value(14)),
+    opacity=alt.condition(f"datum.kind === '{CRITICAL}'", alt.value(0.65), alt.value(0.35)),
+    # descending stars = 5★ drawn first, 1★ last, so criticals sit on top
+    order=alt.Order("overall:Q", sort="descending"),
+    tooltip=[
+        alt.Tooltip("title:N", title="Product"),
+        alt.Tooltip("reviewer_name:N", title="Reviewer"),
+        alt.Tooltip("overall:Q", title="Stars"),
+        alt.Tooltip("helpful_votes:Q", title="Helpful votes", format=","),
+        alt.Tooltip("total_votes:Q", title="Total votes", format=","),
+        alt.Tooltip("vote_ratio:Q", title="Ratio", format=".0%"),
+    ],
+).properties(
+    width=620,
+    height=300,
+    title=alt.Title(
+        "Each product's most helpful review",
+        subtitle="One point per product (top review has ≥5 helpful votes). Critical reviews highlighted.",
+    ),
+)
+```
+
+
+## 7. Troubleshooting
+
+In writing my queries and discerning information from the visualizations I had, there were several lessons and pitfalls avoided. One aspect that I didn't expect until I saw it was the problem in 0.1 binning. The rating_vs_reviewer_avg.sql heatmap was originally binned to 0.1 avg stars on the x axis. I binned it that way because it was simple and made the # of rows manageable for altair. However, this led to "stripes" in the data. Because many reviewers had fewer than 10 reviews, they can't have an average of x.9. So there would be many reviewers with an average of 2.8 and 3.0, but very few with 2.9, comparatively. I ended up using 0.2 binning for this reason.
+
+Another example is the product_trajectory.sql visualization. Originally, there were some pretty big jumps in the lines for several products. However, on a close examination it was clear that these jumps were just being caused by a small sample size. I opted to not show datapoints from when a product had fewer than 10 reviews to remove those misleading jumps.
+
+Perhaps the most embarrassing blunder was that I didn't write my queries with binning in mind originally. I hadn't considered that I don't want an insanely high # of rows when I'm actually making visualizations and hosting them online. So once I was happy with my queries and wanted to look at what they showed, I also had to refactor all of them. Definitely a learning moment.
+
+
+## 8. Conclusion and Reflection
+
+The biggest conclusion I would draw from this analysis is that the cell phone and accessory category largely contains items that are not misleading, once you filter for a 5-core dataset. The fact that each reviewer must have 5 reviews and each product must have 5 reviews filters out a lot of potential low quality reviews and products.
+
+The average reviewer gives a high rating, and the average product has a high rating to go along with it. The underlying message here is that high quality products succeed. There were no products with >30 reviews that had an average rating below 2 stars. If a product got a lot of reviews, it reviewed well.
+
+The timeframe of the data is also not to be forgotten. This data is >10 years old at the time of analysis, and the landscape today could be entirely different. So any analysis is stuck in the time period of the data.
+
+With all that being said, this project was still very insightful for me and I learned a lot. I was able to practice using CTEs and window functions extensively, and I got to get more experience reading sql queries and visualizing them with python. Thank you for reading.
+
+

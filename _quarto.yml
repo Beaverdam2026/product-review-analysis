@@ -1,0 +1,14 @@
+# Renders into docs/ so GitHub Pages can serve the report straight from the
+# repo (Settings -> Pages -> deploy from branch, /docs folder). The explicit
+# render list keeps `quarto render` off notebooks/explore.ipynb, which stays
+# an interactive scratchpad, not a report page.
+# Always invoke through the venv: `uv run quarto render` (bare quarto finds
+# the system python, which lacks the jupyter execution libraries).
+project:
+  output-dir: docs
+  render:
+    - report.qmd
+
+# keep the rendered file named index.html so the GitHub Pages URL works with
+# no filename in it (web servers serve index.html as a directory's default)
+output-file: index

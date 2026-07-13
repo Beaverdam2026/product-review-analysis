@@ -77,10 +77,6 @@ target/
 
 # Jupyter Notebook
 .ipynb_checkpoints
-#   notebooks/explore.ipynb is committed as a starter, with outputs stripped.
-#   Throwaway notebooks go in notebooks/scratch/ and are never committed, since
-#   .ipynb outputs serialise into the JSON and make diffs unreadable.
-notebooks/scratch/
 
 # IPython
 profile_default/
@@ -204,9 +200,9 @@ cython_debug/
 *.kate-swp
 
 # Visual Studio Code
-#   Visual Studio Code specific template is maintained in a separate VisualStudioCode.gitignore 
+#   Visual Studio Code specific template is maintained in a separate VisualStudioCode.gitignore
 #   that can be found at https://github.com/github/gitignore/blob/main/Global/VisualStudioCode.gitignore
-#   and can be added to the global gitignore or merged into this file. However, if you prefer, 
+#   and can be added to the global gitignore or merged into this file. However, if you prefer,
 #   you could uncomment the following to ignore the entire vscode folder
 # .vscode/
 # Temporary file for partial code execution
@@ -241,3 +237,6 @@ Thumbs.db
 
 # Claude Code worktrees (transient, per-session; never commit)
 .claude/worktrees/
+
+/.quarto/
+**/*.quarto_ipynb
